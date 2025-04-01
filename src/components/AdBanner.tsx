@@ -4,27 +4,42 @@ const AdBanner: React.FC = () => {
     const adContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        // Crea e inserta el script de anuncio
+        // Primero, definimos el objeto atOptions globalmente
+        (window as any).atOptions = {
+            'key': 'a5b8480b2cf2c526c693f2bcb282b8f8',
+            'format': 'iframe',
+            'height': 60,
+            'width': 468,
+            'params': {}
+        };
+
+        // Creamos el script que cargará el anuncio
         const script = document.createElement('script');
-        script.src = 'https://www.effectiveratecpm.com/bugtjp9w1x?key=8769f4085754840d1b068ff40d6e9bc5';
+        script.type = 'text/javascript';
+        script.src = '//www.highperformanceformat.com/a5b8480b2cf2c526c693f2bcb282b8f8/invoke.js';
         script.async = true;
 
-        // Añade el script al contenedor
+        // Añadimos el script al contenedor
         if (adContainerRef.current) {
             adContainerRef.current.appendChild(script);
         }
 
-        // Limpieza al desmontar
+        // Limpieza al desmontar el componente
         return () => {
             if (adContainerRef.current && script.parentNode === adContainerRef.current) {
                 adContainerRef.current.removeChild(script);
+                // Eliminamos la variable global al desmontar
+                delete (window as any).atOptions;
             }
         };
     }, []);
 
     return (
         <div className="w-full py-4">
-            <div ref={adContainerRef} className="ad-container bg-gray-50 flex justify-center items-center min-h-[90px] rounded-md overflow-hidden">
+            <div
+                ref={adContainerRef}
+                className="ad-container flex justify-center items-center min-h-[60px] rounded-md overflow-hidden"
+            >
                 {/* El anuncio se cargará aquí */}
             </div>
         </div>
