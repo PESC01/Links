@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { MessageCircle, Send, Facebook, Flag } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ReportLinkModal from '../components/ReportLinkModal';
-import AdBanner from '../components/AdBanner';
+
 
 // Creamos un contexto para compartir la función de reset
 export const HomeContext = React.createContext({
@@ -137,8 +137,7 @@ const Home = () => {
           </button>
         </div>
 
-        {/* Banner de anuncios después de los botones de plataforma */}
-        <AdBanner />
+
 
         {selectedPlatform ? (
           <div>
@@ -177,8 +176,7 @@ const Home = () => {
                         <Flag size={16} />
                       </button>
                     </div>
-                    {/* Insertar anuncio después del 3er enlace */}
-                    {index === 2 && <AdBanner />}
+
                   </React.Fragment>
                 ))
               ) : (
@@ -201,10 +199,7 @@ const Home = () => {
               ))}
             </div>
 
-            {/* Banner de anuncios al final de la página */}
-            <div className="mt-10">
-              <AdBanner />
-            </div>
+
           </div>
         )}
 
