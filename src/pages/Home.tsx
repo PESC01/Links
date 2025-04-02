@@ -4,6 +4,7 @@ import { MessageCircle, Send, Facebook, Flag, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase';
 import ReportLinkModal from '../components/ReportLinkModal';
 import Advertisement from '../components/Advertisement';
+import { useTranslation } from 'react-i18next'; // Importar hook de traducción
 
 // Creamos un contexto para compartir la función de reset
 export const HomeContext = React.createContext({
@@ -28,6 +29,7 @@ interface Link {
 const LINKS_PER_PAGE = 20;
 
 const Home = () => {
+  const { t } = useTranslation(); // Hook para traducciones
   const [categories, setCategories] = useState<Category[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
@@ -189,28 +191,28 @@ const Home = () => {
         {selectedPlatform ? (
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Enlaces recientes de {selectedPlatform}
+              {t('recentLinks')} {selectedPlatform}
             </h1>
 
             {/* Banner para invitar a compartir enlaces */}
             <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-lg mb-6 shadow-md">
               <div className="flex flex-col md:flex-row items-center justify-between">
                 <div className="mb-4 md:mb-0">
-                  <h3 className="text-xl font-bold">¿Tienes un grupo de {selectedPlatform}?</h3>
-                  <p className="mt-1">Compártelo con la comunidad y llega a más personas</p>
+                  <h3 className="text-xl font-bold">{t('haveGroupPlatform', { platform: selectedPlatform })}</h3>
+                  <p className="mt-1">{t('shareWithCommunity')}</p>
                 </div>
                 <Link
                   to="/add-link"
                   className="px-6 py-2 bg-white text-indigo-700 font-medium rounded-md hover:bg-gray-100 transition-colors"
                 >
-                  Compartir mi grupo
+                  {t('shareMyGroup')}
                 </Link>
               </div>
             </div>
 
             <div className="space-y-4">
               {loading && currentPage === 0 ? (
-                <p className="text-center text-gray-600">Cargando enlaces...</p>
+                <p className="text-center text-gray-600">{t('loading')}</p>
               ) : links.length > 0 ? (
                 <>
                   {links.map((link, index) => (
@@ -252,14 +254,14 @@ const Home = () => {
                         className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                         disabled={loading}
                       >
-                        {loading ? 'Cargando...' : 'Siguiente'}
+                        {loading ? t('loading') : t('next')}
                         {!loading && <ChevronRight size={16} className="ml-2" />}
                       </button>
                     </div>
                   )}
                 </>
               ) : (
-                <p className="text-center text-gray-600">No hay enlaces para esta plataforma</p>
+                <p className="text-center text-gray-600">{t('noLinksForPlatform')}</p>
               )}
 
               {/* Anuncio de barra lateral después de algunos enlaces */}
@@ -268,20 +270,20 @@ const Home = () => {
           </div>
         ) : (
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Categorías</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('categories')}</h1>
 
             {/* Banner para invitar a compartir enlaces */}
             <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-lg mb-8 shadow-md">
               <div className="flex flex-col md:flex-row items-center justify-between">
                 <div className="mb-4 md:mb-0">
-                  <h3 className="text-xl font-bold">¿Tienes un grupo que quieras compartir?</h3>
-                  <p className="mt-1">Ayuda a la comunidad a encontrar los mejores grupos</p>
+                  <h3 className="text-xl font-bold">{t('haveGroupShare')}</h3>
+                  <p className="mt-1">{t('helpCommunity')}</p>
                 </div>
                 <Link
                   to="/add-link"
                   className="px-6 py-2 bg-white text-indigo-700 font-medium rounded-md hover:bg-gray-100 transition-colors"
                 >
-                  Compartir un enlace
+                  {t('shareALink')}
                 </Link>
               </div>
             </div>
@@ -307,19 +309,19 @@ const Home = () => {
         {adModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h2 className="text-xl font-bold mb-4">Antes de continuar...</h2>
+              <h2 className="text-xl font-bold mb-4">{t('beforeContinuing')}</h2>
               <div className="my-4">
                 <Advertisement type="banner" />
               </div>
               <p className="mb-4 text-center">
-                Para acceder al enlace, cierra esta ventana y haz clic nuevamente.
+                {t('toAccessLink')}
               </p>
               <div className="flex justify-center">
                 <button
                   onClick={handleAdModalClose}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                 >
-                  Cerrar
+                  {t('close')}
                 </button>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { Flag, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ReportLinkModal from '../components/ReportLinkModal';
 import Advertisement from '../components/Advertisement';
+import { useTranslation } from 'react-i18next'; // Importar hook de traducción
 
 interface Link {
   id: string;
@@ -17,6 +18,7 @@ interface Link {
 const LINKS_PER_PAGE = 20;
 
 const CategoryLinks = () => {
+  const { t } = useTranslation(); // Hook para traducciones
   const { id } = useParams();
   const [links, setLinks] = useState<Link[]>([]);
   const [category, setCategory] = useState<{ name: string } | null>(null);
@@ -110,13 +112,13 @@ const CategoryLinks = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
-        {category?.name || 'Cargando...'}
+        {category?.name || t('loading')}
       </h1>
 
       <Advertisement type="banner" />
 
       {loading && currentPage === 0 ? (
-        <p className="text-center text-gray-600 my-8">Cargando enlaces...</p>
+        <p className="text-center text-gray-600 my-8">{t('loadingLinks')}</p>
       ) : (
         <div className="space-y-4">
           {links.length > 0 ? (
@@ -144,7 +146,7 @@ const CategoryLinks = () => {
                     <button
                       onClick={(e) => handleReportClick(e, link)}
                       className="absolute bottom-2 right-2 text-gray-400 hover:text-red-500 p-2"
-                      title="Reportar enlace"
+                      title={t('reportLink')}
                     >
                       <Flag size={16} />
                     </button>
@@ -162,14 +164,14 @@ const CategoryLinks = () => {
                     className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                     disabled={loading}
                   >
-                    {loading ? 'Cargando...' : 'Siguiente'}
+                    {loading ? t('loading') : t('next')}
                     {!loading && <ChevronRight size={16} className="ml-2" />}
                   </button>
                 </div>
               )}
             </>
           ) : (
-            <p className="text-center text-gray-600">No hay enlaces en esta categoría</p>
+            <p className="text-center text-gray-600">{t('noLinksInCategory')}</p>
           )}
         </div>
       )}
