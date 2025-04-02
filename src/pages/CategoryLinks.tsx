@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Flag } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ReportLinkModal from '../components/ReportLinkModal';
+import Advertisement from '../components/Advertisement';
 
 interface Link {
   id: string;
@@ -56,40 +57,51 @@ const CategoryLinks = () => {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
         {category?.name || 'Cargando...'}
       </h1>
+
+      {/* Anuncio de banner superior */}
+      <Advertisement type="banner" />
+
       <div className="space-y-4">
-        {links.map((link) => (
-          <div
-            key={link.id}
-            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow relative"
-          >
+        {links.map((link, index) => (
+          <React.Fragment key={link.id}>
             <div
-              className="cursor-pointer"
-              onClick={() => handleLinkClick(link.url)}
+              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow relative"
             >
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold text-gray-900">{link.title}</h2>
-                <span className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
-                  {link.platform.name}
-                </span>
+              <div
+                className="cursor-pointer"
+                onClick={() => handleLinkClick(link.url)}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-xl font-semibold text-gray-900">{link.title}</h2>
+                  <span className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+                    {link.platform.name}
+                  </span>
+                </div>
+                <p className="text-gray-600">{link.description}</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  {new Date(link.created_at).toLocaleDateString()}
+                </p>
               </div>
-              <p className="text-gray-600">{link.description}</p>
-              <p className="text-sm text-gray-500 mt-2">
-                {new Date(link.created_at).toLocaleDateString()}
-              </p>
+              <button
+                onClick={(e) => handleReportClick(e, link)}
+                className="absolute bottom-2 right-2 text-gray-400 hover:text-red-500 p-2"
+                title="Reportar enlace"
+              >
+                <Flag size={16} />
+              </button>
             </div>
-            <button
-              onClick={(e) => handleReportClick(e, link)}
-              className="absolute bottom-2 right-2 text-gray-400 hover:text-red-500 p-2"
-              title="Reportar enlace"
-            >
-              <Flag size={16} />
-            </button>
-          </div>
+
+            {/* Mostrar un anuncio después de cada 3 enlaces */}
+            {(index + 1) % 3 === 0 && <Advertisement type="sidebar" />}
+          </React.Fragment>
         ))}
         {links.length === 0 && (
           <p className="text-center text-gray-600">No hay enlaces en esta categoría</p>
         )}
       </div>
+
+      {/* Anuncio de banner inferior */}
+      <Advertisement type="banner" />
 
       {selectedLink && (
         <ReportLinkModal
