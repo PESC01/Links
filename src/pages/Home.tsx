@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, Send, Facebook, Flag } from 'lucide-react';
+import { MessageCircle, Send, Facebook, Flag, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ReportLinkModal from '../components/ReportLinkModal';
 import Advertisement from '../components/Advertisement';
@@ -25,6 +25,8 @@ interface Link {
   created_at: string;
 }
 
+const LINKS_PER_PAGE = 20;
+
 const Home = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
@@ -32,9 +34,12 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [selectedLink, setSelectedLink] = useState<Link | null>(null);
-  // Nuevo estado para el modal de anuncio
   const [adModalOpen, setAdModalOpen] = useState(false);
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+
+  // Estados para paginación
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMoreLinks, setHasMoreLinks] = useState(false);
 
   // Función para resetear la plataforma seleccionada
   const resetSelectedPlatform = () => {
@@ -55,6 +60,14 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    // Al cambiar la plataforma, reiniciar la paginación
+    if (selectedPlatform) {
+      setCurrentPage(0);
+      setLinks([]);
+    }
+  }, [selectedPlatform]);
+
+  useEffect(() => {
     const fetchLinksByPlatform = async () => {
       if (!selectedPlatform) {
         setLinks([]);
@@ -71,18 +84,23 @@ const Home = () => {
           .single();
 
         if (platformData) {
-          const { data: linksData } = await supabase
+          // Consulta principal con paginación
+          const { data: linksData, count } = await supabase
             .from('links')
             .select(`
               *,
               platform:platforms(name),
               category:categories(name)
-            `)
+            `, { count: 'exact' })
             .eq('platform_id', platformData.id)
             .order('created_at', { ascending: false })
-            .limit(10);
+            .range(currentPage * LINKS_PER_PAGE, (currentPage + 1) * LINKS_PER_PAGE - 1);
 
-          if (linksData) setLinks(linksData);
+          if (linksData) {
+            setLinks(linksData);
+            // Verificar si hay más páginas
+            setHasMoreLinks(count !== null && (currentPage + 1) * LINKS_PER_PAGE < count);
+          }
         }
       } catch (error) {
         console.error('Error fetching links:', error);
@@ -91,13 +109,19 @@ const Home = () => {
       }
     };
 
-    fetchLinksByPlatform();
-  }, [selectedPlatform]);
+    if (selectedPlatform) {
+      fetchLinksByPlatform();
+    }
+  }, [selectedPlatform, currentPage]);
 
   const handlePlatformSelect = (platform: string) => {
     setSelectedPlatform(previousPlatform =>
       previousPlatform === platform ? null : platform
     );
+  };
+
+  const handleLoadMore = () => {
+    setCurrentPage(prevPage => prevPage + 1);
   };
 
   const handleLinkClick = (url: string) => {
@@ -118,10 +142,9 @@ const Home = () => {
     }
   };
 
-  // Función para cerrar el modal de anuncio y continuar al enlace
+  // Función para cerrar el modal de anuncio
   const handleAdModalClose = () => {
     setAdModalOpen(false);
-    // No abrimos el enlace automáticamente, el usuario debe hacer clic nuevamente
   };
 
   const handleReportClick = (e: React.MouseEvent, link: Link) => {
@@ -169,39 +192,55 @@ const Home = () => {
               Enlaces recientes de {selectedPlatform}
             </h1>
             <div className="space-y-4">
-              {loading ? (
+              {loading && currentPage === 0 ? (
                 <p className="text-center text-gray-600">Cargando enlaces...</p>
               ) : links.length > 0 ? (
-                links.map((link, index) => (
-                  <React.Fragment key={link.id}>
-                    <div
-                      className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow relative"
-                    >
+                <>
+                  {links.map((link, index) => (
+                    <React.Fragment key={link.id}>
                       <div
-                        className="cursor-pointer"
-                        onClick={() => handleLinkClick(link.url)}
+                        className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow relative"
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <h2 className="text-xl font-semibold text-gray-900">{link.title}</h2>
-                          <span className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
-                            {link.category.name}
-                          </span>
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => handleLinkClick(link.url)}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <h2 className="text-xl font-semibold text-gray-900">{link.title}</h2>
+                            <span className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+                              {link.category.name}
+                            </span>
+                          </div>
+                          <p className="text-gray-600">{link.description}</p>
+                          <p className="text-sm text-gray-500 mt-2">
+                            {new Date(link.created_at).toLocaleDateString()}
+                          </p>
                         </div>
-                        <p className="text-gray-600">{link.description}</p>
-                        <p className="text-sm text-gray-500 mt-2">
-                          {new Date(link.created_at).toLocaleDateString()}
-                        </p>
+                        <button
+                          onClick={(e) => handleReportClick(e, link)}
+                          className="absolute bottom-2 right-2 text-gray-400 hover:text-red-500 p-2"
+                          title="Reportar enlace"
+                        >
+                          <Flag size={16} />
+                        </button>
                       </div>
+                    </React.Fragment>
+                  ))}
+
+                  {/* Botón para cargar más enlaces */}
+                  {hasMoreLinks && (
+                    <div className="flex justify-center mt-6">
                       <button
-                        onClick={(e) => handleReportClick(e, link)}
-                        className="absolute bottom-2 right-2 text-gray-400 hover:text-red-500 p-2"
-                        title="Reportar enlace"
+                        onClick={handleLoadMore}
+                        className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                        disabled={loading}
                       >
-                        <Flag size={16} />
+                        {loading ? 'Cargando...' : 'Siguiente'}
+                        {!loading && <ChevronRight size={16} className="ml-2" />}
                       </button>
                     </div>
-                  </React.Fragment>
-                ))
+                  )}
+                </>
               ) : (
                 <p className="text-center text-gray-600">No hay enlaces para esta plataforma</p>
               )}
