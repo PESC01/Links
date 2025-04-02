@@ -20,8 +20,9 @@ const CategoryLinks = () => {
   const [category, setCategory] = useState<{ name: string } | null>(null);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [selectedLink, setSelectedLink] = useState<Link | null>(null);
-  const [adModalOpen, setAdModalOpen] = useState(false);
-  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+
+  // URL directa del anuncio
+  const adUrl = "https://www.effectiveratecpm.com/xmddkp9d?key=035ae4a646fa5cc053e42f8be7bf48c5";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,11 +49,14 @@ const CategoryLinks = () => {
     const clickedLinks = JSON.parse(localStorage.getItem('clickedLinks') || '{}');
 
     if (!clickedLinks[url]) {
-      setPendingUrl(url);
-      setAdModalOpen(true);
+      // Primera vez: redirigir al anuncio directamente
+      window.open(adUrl, '_blank');
+
+      // Guardar en localStorage que el usuario ya ha visto el anuncio para este enlace
       clickedLinks[url] = true;
       localStorage.setItem('clickedLinks', JSON.stringify(clickedLinks));
     } else {
+      // Segunda vez: abrir el enlace original
       window.open(url, '_blank');
     }
   };
@@ -61,10 +65,6 @@ const CategoryLinks = () => {
     e.stopPropagation();
     setSelectedLink(link);
     setReportModalOpen(true);
-  };
-
-  const handleAdModalClose = () => {
-    setAdModalOpen(false);
   };
 
   return (
@@ -125,28 +125,6 @@ const CategoryLinks = () => {
             setSelectedLink(null);
           }}
         />
-      )}
-
-      {adModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Antes de continuar...</h2>
-            <div className="my-4">
-              <Advertisement type="banner" />
-            </div>
-            <p className="mb-4 text-center">
-              Para acceder al enlace, cierra esta ventana y haz clic nuevamente.
-            </p>
-            <div className="flex justify-center">
-              <button
-                onClick={handleAdModalClose}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
