@@ -20,6 +20,8 @@ const CategoryLinks = () => {
   const [category, setCategory] = useState<{ name: string } | null>(null);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [selectedLink, setSelectedLink] = useState<Link | null>(null);
+  const [adModalOpen, setAdModalOpen] = useState(false);
+  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,13 +45,26 @@ const CategoryLinks = () => {
   }, [id]);
 
   const handleLinkClick = (url: string) => {
-    window.open(url, '_blank');
+    const clickedLinks = JSON.parse(localStorage.getItem('clickedLinks') || '{}');
+
+    if (!clickedLinks[url]) {
+      setPendingUrl(url);
+      setAdModalOpen(true);
+      clickedLinks[url] = true;
+      localStorage.setItem('clickedLinks', JSON.stringify(clickedLinks));
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   const handleReportClick = (e: React.MouseEvent, link: Link) => {
-    e.stopPropagation(); // Evitar que se abra el enlace
+    e.stopPropagation();
     setSelectedLink(link);
     setReportModalOpen(true);
+  };
+
+  const handleAdModalClose = () => {
+    setAdModalOpen(false);
   };
 
   return (
@@ -58,7 +73,6 @@ const CategoryLinks = () => {
         {category?.name || 'Cargando...'}
       </h1>
 
-      {/* Anuncio de banner superior */}
       <Advertisement type="banner" />
 
       <div className="space-y-4">
@@ -91,7 +105,6 @@ const CategoryLinks = () => {
               </button>
             </div>
 
-            {/* Mostrar un anuncio después de cada 3 enlaces */}
             {(index + 1) % 3 === 0 && <Advertisement type="sidebar" />}
           </React.Fragment>
         ))}
@@ -100,7 +113,6 @@ const CategoryLinks = () => {
         )}
       </div>
 
-      {/* Anuncio de banner inferior */}
       <Advertisement type="banner" />
 
       {selectedLink && (
@@ -113,6 +125,28 @@ const CategoryLinks = () => {
             setSelectedLink(null);
           }}
         />
+      )}
+
+      {adModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Antes de continuar...</h2>
+            <div className="my-4">
+              <Advertisement type="banner" />
+            </div>
+            <p className="mb-4 text-center">
+              Para acceder al enlace, cierra esta ventana y haz clic nuevamente.
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={handleAdModalClose}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

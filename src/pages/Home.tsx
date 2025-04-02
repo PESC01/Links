@@ -32,6 +32,9 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [selectedLink, setSelectedLink] = useState<Link | null>(null);
+  // Nuevo estado para el modal de anuncio
+  const [adModalOpen, setAdModalOpen] = useState(false);
+  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
 
   // Función para resetear la plataforma seleccionada
   const resetSelectedPlatform = () => {
@@ -98,7 +101,27 @@ const Home = () => {
   };
 
   const handleLinkClick = (url: string) => {
-    window.open(url, '_blank');
+    // Verificar si es la primera vez que el usuario hace clic en este enlace
+    const clickedLinks = JSON.parse(localStorage.getItem('clickedLinks') || '{}');
+
+    if (!clickedLinks[url]) {
+      // Primera vez: mostrar anuncio
+      setPendingUrl(url);
+      setAdModalOpen(true);
+
+      // Guardar en localStorage que el usuario ha visto el anuncio para este enlace
+      clickedLinks[url] = true;
+      localStorage.setItem('clickedLinks', JSON.stringify(clickedLinks));
+    } else {
+      // Segunda vez: abrir el enlace
+      window.open(url, '_blank');
+    }
+  };
+
+  // Función para cerrar el modal de anuncio y continuar al enlace
+  const handleAdModalClose = () => {
+    setAdModalOpen(false);
+    // No abrimos el enlace automáticamente, el usuario debe hacer clic nuevamente
   };
 
   const handleReportClick = (e: React.MouseEvent, link: Link) => {
@@ -206,6 +229,29 @@ const Home = () => {
 
         {/* Anuncio de banner en la parte inferior */}
         <Advertisement type="banner" />
+
+        {/* Modal de anuncio */}
+        {adModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <h2 className="text-xl font-bold mb-4">Antes de continuar...</h2>
+              <div className="my-4">
+                <Advertisement type="banner" />
+              </div>
+              <p className="mb-4 text-center">
+                Para acceder al enlace, cierra esta ventana y haz clic nuevamente.
+              </p>
+              <div className="flex justify-center">
+                <button
+                  onClick={handleAdModalClose}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {selectedLink && (
           <ReportLinkModal
