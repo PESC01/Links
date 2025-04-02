@@ -191,6 +191,23 @@ const Home = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               Enlaces recientes de {selectedPlatform}
             </h1>
+
+            {/* Banner para invitar a compartir enlaces */}
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-lg mb-6 shadow-md">
+              <div className="flex flex-col md:flex-row items-center justify-between">
+                <div className="mb-4 md:mb-0">
+                  <h3 className="text-xl font-bold">¿Tienes un grupo de {selectedPlatform}?</h3>
+                  <p className="mt-1">Compártelo con la comunidad y llega a más personas</p>
+                </div>
+                <Link
+                  to="/add-link"
+                  className="px-6 py-2 bg-white text-indigo-700 font-medium rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  Compartir mi grupo
+                </Link>
+              </div>
+            </div>
+
             <div className="space-y-4">
               {loading && currentPage === 0 ? (
                 <p className="text-center text-gray-600">Cargando enlaces...</p>
@@ -252,6 +269,23 @@ const Home = () => {
         ) : (
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-8">Categorías</h1>
+
+            {/* Banner para invitar a compartir enlaces */}
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-lg mb-8 shadow-md">
+              <div className="flex flex-col md:flex-row items-center justify-between">
+                <div className="mb-4 md:mb-0">
+                  <h3 className="text-xl font-bold">¿Tienes un grupo que quieras compartir?</h3>
+                  <p className="mt-1">Ayuda a la comunidad a encontrar los mejores grupos</p>
+                </div>
+                <Link
+                  to="/add-link"
+                  className="px-6 py-2 bg-white text-indigo-700 font-medium rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  Compartir un enlace
+                </Link>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {categories.map((category) => (
                 <Link
